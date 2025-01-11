@@ -11,6 +11,7 @@
     "lint:type": "tsc --noEmit"
   },
   "dependencies": {
+    "@sanity/vision": "^3.69.0",
     "@headlessui/react": "^2.2.0",
     "@types/node": "18.11.18",
     "@types/react": "18.0.26",
