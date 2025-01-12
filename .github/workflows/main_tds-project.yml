@@ -35,5 +35,5 @@ jobs:
         with:
           app-name: 'tds-final'
           slot-name: "Production"
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_0753AD5BCE3C4859B869C8D0CEF6EBE6 }}
+          publish-profile: ${{ secrets.PUBLISH_PROFILE }}
           package: ./build/standalone
