@@ -34,6 +34,8 @@ const nextConfig = withPWA({
       },
     ],
   },
+  output:"standalone",
+
 });
 
 module.exports = nextConfig;
