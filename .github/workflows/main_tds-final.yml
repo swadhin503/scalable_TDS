@@ -1,54 +1,39 @@
-name: App Service Deployment
+name: Build and deploy Next.Js app to Azure Web App
 
 on:
   push:
     branches:
-      - main
+      - main  
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: web-inmeta-learn
+  APPLICATION_PUBLISH_PROFILE: ${{ secrets.APP_PUBLISH_PROFILE }}
+  WEBAPP_NAME: "medium-next-app-service-deploy"
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout code
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # Setup Node.js environment
-      - name: Setup Node.js
+      - name: Set up Node.js version
         uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: "yarn"
+          node-version: "20.x"
 
-      # Install dependencies and build the app
-      - name: Install dependencies and build
+      - name: npm install, build, and test
         run: |
           npm install --force
           npm run build
+          mv ./build/static ./build/standalone/build
+          mv ./public ./build/standalone
 
-      # Prepare deployment files
-      - name: Prepare deployment files
-        run: |
-          mkdir -p ./.next/standalone
-          cp -R ./public ./.next/standalone/public
-          cp -R ./.next/static ./.next/standalone/.next/static
-          cp package.json ./.next/standalone/package.json
-
-      # Login to Azure
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      # Deploy to Azure App Service
-      - name: Deploy to Azure Web App
+      - name: "Deploy to Azure Web App"
+        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          slot-name: "production"
-          package: ./.next/standalone
+          app-name: ${{ env.WEBAPP_NAME }}
+          slot-name: "Production"
+          publish-profile: ${{ env.APPLICATION_PUBLISH_PROFILE }}
+          package: ./build/standalone
