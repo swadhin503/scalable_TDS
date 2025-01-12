@@ -35,6 +35,7 @@ const nextConfig = withPWA({
     ],
   },
   output:"standalone",
+   distDir: 'build',
 
 });
 
