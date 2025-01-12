@@ -11,29 +11,36 @@ env:
   WEBAPP_NAME: "medium-next-app-service-deploy"
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v4
 
+      # Step 2: Set up Node.js
       - name: Set up Node.js version
         uses: actions/setup-node@v4
         with:
           node-version: "20.x"
 
-      - name: npm install, build, and test
+      # Step 3: Install dependencies and build the app
+      - name: Install dependencies and build
         run: |
           npm install
           npm run build
-          mv ./build/static ./build/standalone/build
-          mv ./public ./build/standalone
+          mkdir -p .next/standalone
+          cp -R public .next/standalone/public
+          cp -R .next/static .next/standalone/.next/static
+          cp package.json .next/standalone/package.json
 
-      - name: "Deploy to Azure Web App"
-        id: deploy-to-webapp
+      # Step 4: Deploy to Azure Web App
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
+        id: deploy-to-webapp
         with:
-          app-name: 'tds-final'
+          app-name: ${{ env.WEBAPP_NAME }}
           slot-name: "Production"
           publish-profile: ${{ secrets.PUBLISH_PROFILE }}
-          package: ./build/standalone
+          package: ./.next/standalone
