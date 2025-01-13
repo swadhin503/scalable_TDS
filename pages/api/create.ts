@@ -6,7 +6,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  if (req.method === 'POST' && req?.query?.role) {
+  if (req.method === 'POST' && req?.body) {
     try {
       const userInfo = req.body;
       const isExist = await client.fetch(singleUserQuery(userInfo?._id));
