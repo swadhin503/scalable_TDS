@@ -98,8 +98,9 @@ export default function Upload() {
   }
 
   useEffect(() => {
-    if (status !== 'loading' && !user) {
+    if (status !== 'loading' && user?.role !== 'creator') {
       router.back();
+      return;
     }
   }, [user, router, status]);
 

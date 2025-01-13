@@ -1,6 +1,5 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
-import { client } from '../../../utils/client';
 
 export const AUTH_OPTIONS = {
   // Configure one or more authentication providers
@@ -12,6 +11,12 @@ export const AUTH_OPTIONS = {
   ],
   secret: 'zwel',
   callbacks: {
+    async jwt({ token, trigger, session }): Promise<any> {
+      if (trigger === 'update') {
+        return { ...token, ...session };
+      }
+      return token;
+    },
     async session({ token }): Promise<any> {
       const userInfo = {
         _id: token?.sub!,
@@ -20,7 +25,9 @@ export const AUTH_OPTIONS = {
         image: token?.picture!,
       };
 
-      await client.createIfNotExists(userInfo);
+      if (token?.role) {
+        userInfo.role = token.role;
+      }
       return userInfo;
     },
   },

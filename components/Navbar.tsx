@@ -1,15 +1,15 @@
+import { signIn, useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { FormEvent, useRef, useState } from 'react';
+import { BiMenuAltLeft } from 'react-icons/bi';
 import { CgMathPlus } from 'react-icons/cg';
 import { IoSearchOutline } from 'react-icons/io5';
-import { signIn, useSession } from 'next-auth/react';
-import User from './User';
-import LogoLight from '../utils/LogoLight';
-import LogoDark from '../utils/LogoDark';
-import { FormEvent, useRef } from 'react';
-import { useRouter } from 'next/router';
 import useStore from '../store';
-import { BiMenuAltLeft } from 'react-icons/bi';
+import LogoDark from '../utils/LogoDark';
+import LogoLight from '../utils/LogoLight';
 import { toggleSidebarDrawer } from '../utils/sidebar-drawer';
+import User from './User';
 
 type Props = {
   hasSidebar: boolean;
@@ -17,20 +17,20 @@ type Props = {
 
 export default function Navbar({ hasSidebar }: Props) {
   const { data: user }: any = useSession();
-
   const { theme } = useStore();
   const router = useRouter();
-
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [popupVisible, setPopupVisible] = useState(false);
 
   function handleSearch(e: FormEvent) {
     e.preventDefault();
-
     const searchTerm = searchInputRef.current?.value!.trim();
-
     if (!searchTerm) return;
-
     router.push(`/search?q=${searchTerm}`);
+  }
+
+  function handleLoginClick() {
+    setPopupVisible(true);
   }
 
   return (
@@ -39,7 +39,7 @@ export default function Navbar({ hasSidebar }: Props) {
         <Link
           href='/'
           aria-label='TikTok_logo'
-          className={`${!hasSidebar ? 'block' : 'hidden lg:block'} `}
+          className={`${!hasSidebar ? 'block' : 'hidden lg:block'}`}
         >
           {theme === 'dark' ? <LogoDark /> : <LogoLight />}
         </Link>
@@ -76,20 +76,57 @@ export default function Navbar({ hasSidebar }: Props) {
         <div className='flex items-center'>
           {user ? (
             <>
-              <Link
-                href='/upload'
-                className='btn-secondary mr-2 flex items-center'
-              >
-                <CgMathPlus />
-                <p className='ml-2'>Upload</p>
-              </Link>
-
+              {user && user?.role === 'creator' && (
+                <Link
+                  href='/upload'
+                  className='btn-secondary mr-2 flex items-center'
+                >
+                  <CgMathPlus />
+                  <p className='ml-2'>Upload</p>
+                </Link>
+              )}
               <User />
             </>
           ) : (
-            <button onClick={() => signIn('google')} className='btn-primary'>
-              Login
-            </button>
+            <>
+              <button className='btn-primary' onClick={handleLoginClick}>
+                Login
+              </button>
+              {popupVisible && (
+                <div className='fixed inset-0 flex items-center justify-center bg-black bg-opacity-50'>
+                  <div className='rounded-lg bg-white p-4 shadow-lg dark:bg-black'>
+                    <button
+                      onClick={() =>
+                        signIn('google', {
+                          // redirect: false,
+                          callbackUrl: `${process.env.NEXT_PUBLIC_ROOT_URL}/login?role=creator`,
+                        })
+                      }
+                      className='btn-primary mb-2 w-full'
+                    >
+                      Login as creator
+                    </button>
+                    <button
+                      onClick={() =>
+                        signIn('google', {
+                          // redirect: false,
+                          callbackUrl: `${process.env.NEXT_PUBLIC_ROOT_URL}/login?role=user`,
+                        })
+                      }
+                      className='btn-primary w-full'
+                    >
+                      Login as user
+                    </button>
+                    <button
+                      onClick={() => setPopupVisible(false)}
+                      className='mt-4 text-gray-500'
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
