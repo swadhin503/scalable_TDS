@@ -1,36 +1,64 @@
-import NextAuth, { NextAuthOptions } from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
+'use client';
 
-export const AUTH_OPTIONS = {
-  // Configure one or more authentication providers
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
-  ],
-  secret: 'zwel',
-  callbacks: {
-    async jwt({ token, trigger, session }): Promise<any> {
-      if (trigger === 'update') {
-        return { ...token, ...session };
-      }
-      return token;
+import { useSession } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
+
+async function createUserAction(userInfo) {
+  const res = await fetch(
+`    ${process.env.NEXT_PUBLIC_ROOT_URL}/api/create`,
+
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userInfo),
     },
-    async session({ token }): Promise<any> {
-      const userInfo = {
-        _id: token?.sub!,
-        _type: 'user',
-        userName: token?.name!,
-        image: token?.picture!,
-      };
+  );
+  return res;
+}
 
-      if (token?.role) {
-        userInfo.role = token.role;
+export default function Login() {
+  const { update, status, data } = useSession();
+  const searchPerams = useSearchParams();
+  const role = searchPerams.get('role') || 'user';
+  const { replace } = useRouter();
+  useEffect(() => {
+    (async () => {
+      if (data?.role) {
+        replace('/');
+        return;
       }
-      return userInfo;
-    },
-  },
-} satisfies NextAuthOptions;
+      if (role && status === 'authenticated') {
+        try {
+          const userInfo = {
+            _id: data?._id!,
+            _type: 'user',
+            userName: data?.userName!,
+            image: data?.iamge!,
+            role,
+          };
 
-export default NextAuth(AUTH_OPTIONS);
+          const res = await createUserAction(userInfo);
+          const data = await res.json();
+          await update({
+            role: data?.role || 'user',
+          });
+        } catch (error) {}
+        replace('/');
+        // console.log(res);
+      } else {
+        replace('/');
+      }
+    })();
+  }, [role, status, data, replace, update]);
+  return (
+    <div className='flex h-screen w-screen items-center justify-center'>
+      <h1 className='animate-pulse text-3xl font-bold dark:text-white'>
+        Logging .....
+      </h1>
+    </div>
+ 
+);
+}

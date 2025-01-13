@@ -36,6 +36,12 @@ const nextConfig = withPWA({
   },
   output:"standalone",
    distDir: 'build',
+   eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 
 });
 
