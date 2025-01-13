@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 
 async function createUserAction(userInfo) {
   const res = await fetch(
-`    ${process.env.NEXT_PUBLIC_ROOT_URL}/api/create`,
+    `    ${process.env.NEXT_PUBLIC_ROOT_URL}/api/create`,
 
     {
       method: 'POST',
@@ -30,6 +30,7 @@ export default function Login() {
         replace('/');
         return;
       }
+
       if (role && status === 'authenticated') {
         try {
           const userInfo = {
@@ -41,13 +42,16 @@ export default function Login() {
           };
 
           const res = await createUserAction(userInfo);
-          const data = await res.json();
+          const resdata = await res.json();
           await update({
-            role: data?.data?.role || 'user',
+            role: resdata?.data?.role || 'user',
           });
-          replace('/')
-        } catch (error) {}
-       // replace('/');
+          replace('/');
+        } catch (error) {
+          console.log(error);
+        }
+
+        // replace('/');
         // console.log(res);
       } else {
         //replace('/');
@@ -60,6 +64,5 @@ export default function Login() {
         Logging .....
       </h1>
     </div>
- 
-);
+  );
 }
