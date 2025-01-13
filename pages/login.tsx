@@ -45,11 +45,12 @@ export default function Login() {
           await update({
             role: data?.data?.role || 'user',
           });
+          replace('/')
         } catch (error) {}
-        replace('/');
+       // replace('/');
         // console.log(res);
       } else {
-        replace('/');
+        //replace('/');
       }
     })();
   }, [role, status, data, replace, update]);
