@@ -8,7 +8,7 @@ export default async function handler(
 ) {
   if (req.method === 'POST' && req?.query?.role) {
     try {
-      const { userInfo } = req.body;
+      const userInfo = req.body;
       const isExist = await client.fetch(singleUserQuery(userInfo?._id));
       if (isExist?.length) {
         return res.status(200).json({ message: 'ok', data: isExist[0] });
