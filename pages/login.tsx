@@ -43,7 +43,7 @@ export default function Login() {
           const res = await createUserAction(userInfo);
           const data = await res.json();
           await update({
-            role: data?.role || 'user',
+            role: data?.data?.role || 'user',
           });
         } catch (error) {}
         replace('/');
