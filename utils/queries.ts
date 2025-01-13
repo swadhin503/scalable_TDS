@@ -1,5 +1,5 @@
 export const getAllPostsByLimit = (userId: string) => {
-  const query = `*[_type == "post"] | order(_createdAt desc) [1...30] {
+  const query = `*[_type == "post"] | order(_createdAt desc) [0...30] {
     _id,
      caption,
        video{
